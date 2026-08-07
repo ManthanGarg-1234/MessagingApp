@@ -1,0 +1,11 @@
+{
+  "name": "Baatein",
+  "short_name": "Baatein",
+  "description": "Lightweight, end-to-end encrypted messaging with QR device pairing.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "icons": []
+}
