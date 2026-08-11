@@ -5,11 +5,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://aethersync-backend.onrender.com/api/$1"
-    },
-    {
-      "source": "/ws",
-      "destination": "https://aethersync-backend.onrender.com/ws"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",

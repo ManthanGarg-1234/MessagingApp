@@ -1,0 +1,14 @@
+name: aethersync
+type: web
+app: aethersync
+routes:
+  - path: /
+    port: 4000
+ports:
+  - port: 4000
+    protocol: http
+env:
+  - key: PORT
+    value: "4000"
+  - key: NODE_ENV
+    value: "production"

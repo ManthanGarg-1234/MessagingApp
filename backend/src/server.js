@@ -20,7 +20,7 @@ import channelRoutes from "./routes/channels.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
+export const app = express();
 
 const ALLOWED_ORIGIN = process.env.CLIENT_ORIGIN || "*";
 app.use(cors({ origin: ALLOWED_ORIGIN, credentials: true }));
