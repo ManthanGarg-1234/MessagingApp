@@ -1,0 +1,20 @@
+{
+  "name": "aethersync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AetherSync - End-to-End Encrypted Communications & Social Nexus",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "start": "npx concurrently \"npm run dev --prefix backend\" \"npm run start --prefix frontend\"",
+    "dev": "npx concurrently \"npm run dev --prefix backend\" \"npm run start --prefix frontend\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run start --prefix frontend",
+    "test": "npm test --prefix backend && npm run typecheck --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -132,9 +132,10 @@ export class WsClient {
     ciphertext: string,
     nonce: string,
     clientMsgId: string,
+    contentType: string = "text",
     replyToSnippet: string = ""
   ): void {
-    const payload = { type: "message:send", conversationId, ciphertext, nonce, clientMsgId, replyToSnippet };
+    const payload = { type: "message:send", conversationId, ciphertext, nonce, clientMsgId, contentType, replyToSnippet };
     this.send(payload);
   }
 
@@ -158,13 +159,31 @@ export class WsClient {
     this.send({ type: typing ? "typing:start" : "typing:stop", conversationId });
   }
 
-  on(listener: Listener): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+  sendTypingStart(conversationId: string): void {
+    this.setTyping(conversationId, true);
+  }
+
+  sendTypingStop(conversationId: string): void {
+    this.setTyping(conversationId, false);
+  }
+
+  on(typeOrListener: string | Listener, handler?: (event: any) => void): () => void {
+    if (typeof typeOrListener === "string" && typeof handler === "function") {
+      const wrapper: Listener = (evt: ServerEvent) => {
+        if (evt.type === typeOrListener) {
+          handler(evt);
+        }
+      };
+      this.listeners.add(wrapper);
+      return () => this.listeners.delete(wrapper);
+    } else if (typeof typeOrListener === "function") {
+      this.listeners.add(typeOrListener);
+      return () => this.listeners.delete(typeOrListener);
+    }
+    return () => {};
   }
 
   close(): void {
     this.socket?.close();
   }
 }
-

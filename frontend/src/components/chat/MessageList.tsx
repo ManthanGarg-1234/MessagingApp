@@ -374,4 +374,3 @@ export function MessageList({ messages, onReact, onReply, onDelete, onPin, onSta
     </>
   );
 }
-

@@ -255,6 +255,53 @@ export function initWebSocketServer(httpServer) {
           break;
         }
 
+        case "call:invite":
+        case "call:accept":
+        case "call:reject":
+        case "call:end": {
+          if (!userId) return;
+          const { targetUserId, isVideo, peerName, signalData, callId } = msg;
+          if (targetUserId) {
+            broadcastToUser(targetUserId.toString(), {
+              type: msg.type,
+              fromUserId: userId,
+              isVideo,
+              peerName,
+              signalData,
+              callId,
+            });
+          }
+          break;
+        }
+
+        case "friend:request":
+        case "friend:response": {
+          if (!userId) return;
+          const { targetUserId } = msg;
+          if (targetUserId) {
+            broadcastToUser(targetUserId.toString(), {
+              type: msg.type,
+              fromUserId: userId,
+            });
+          }
+          break;
+        }
+
+        case "status:update": {
+          if (!userId) return;
+          const { customStatus } = msg;
+          for (const [id, sockets] of userSockets.entries()) {
+            if (id !== userId) {
+              for (const s of sockets) {
+                if (s.readyState === s.OPEN) {
+                  s.send(JSON.stringify({ type: "status:update", userId, customStatus }));
+                }
+              }
+            }
+          }
+          break;
+        }
+
         default:
           socket.send(
             JSON.stringify({

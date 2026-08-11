@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { getOrCreateIdentityKeyPair } from "../crypto/e2ee";
+import { getOrCreateIdentityKeyPair } from "../../crypto/e2ee";
 
 interface PairingInitResponse {
   code: string;
@@ -49,7 +49,7 @@ export function QRPairingHost({ apiBase, token, onConversationReady }: HostProps
       const sessionData: PairingInitResponse = {
         code: data.code,
         expiresAt: data.expiresAt || new Date().toISOString(),
-        deepLink: data.deepLink || `baatein://pair/${data.code}`,
+        deepLink: data.deepLink || `aethersync://pair/${data.code}`,
       };
 
       setSession(sessionData);
@@ -68,7 +68,6 @@ export function QRPairingHost({ apiBase, token, onConversationReady }: HostProps
     });
   }, [apiBase, token]);
 
-  // Poll status as a fallback
   useEffect(() => {
     if (!session || status !== "pending") return;
     const interval = setInterval(async () => {
@@ -139,7 +138,7 @@ export function QRPairingScanner({ apiBase, token, onConversationReady }: Scanne
       const parts = parsed.pathname.split("/").filter(Boolean);
       return parts[parts.length - 1] || trimmed;
     } catch {
-      const match = trimmed.match(/baatein:\/\/pair\/([^\s/?#]+)/i);
+      const match = trimmed.match(/aethersync:\/\/pair\/([^\s/?#]+)/i) || trimmed.match(/baatein:\/\/pair\/([^\s/?#]+)/i);
       return match ? match[1] : trimmed;
     }
   }

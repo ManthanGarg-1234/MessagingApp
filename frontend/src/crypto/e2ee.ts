@@ -1,17 +1,8 @@
 /**
- * End-to-end encryption helpers for Baatein.
+ * End-to-end encryption helpers for AetherSync.
  *
  * Primitives: X25519 key agreement + XSalsa20-Poly1305 authenticated encryption,
  * via tweetnacl (same primitive family as libsodium / Signal's underlying crypto).
- *
- * Design:
- *  - Each device generates a long-term identity keypair on first run.
- *  - The PRIVATE key never leaves the device (kept in IndexedDB, optionally
- *    wrapped with a passphrase-derived key before persisting).
- *  - During pairing, two devices exchange PUBLIC keys and each derives the
- *    same shared secret locally via nacl.box.before().
- *  - Every message gets a fresh random 24-byte nonce; nonce + ciphertext are
- *    sent together, the server never sees plaintext or private keys.
  */
 
 import nacl from "tweetnacl";
@@ -58,11 +49,29 @@ export function encryptMessage(plaintext: string, sharedKey: Uint8Array): Encryp
   };
 }
 
-/** Decrypt a payload received from the server. Throws if tampered or wrong key. */
-export function decryptMessage(payload: EncryptedPayload, sharedKey: Uint8Array): string {
-  const ciphertext = decodeBase64(payload.ciphertext);
-  const nonce = decodeBase64(payload.nonce);
-  const plaintextBytes = nacl.box.open.after(ciphertext, nonce, sharedKey);
+/** Decrypt a payload received from the server. Accepts either EncryptedPayload or (ciphertext, nonce, sharedKey). */
+export function decryptMessage(
+  payloadOrCiphertext: EncryptedPayload | string,
+  nonceOrSharedKey: Uint8Array | string,
+  sharedKeyParam?: Uint8Array
+): string {
+  let cipherB64: string;
+  let nonceB64: string;
+  let key: Uint8Array;
+
+  if (typeof payloadOrCiphertext === "object" && payloadOrCiphertext !== null) {
+    cipherB64 = payloadOrCiphertext.ciphertext;
+    nonceB64 = payloadOrCiphertext.nonce;
+    key = nonceOrSharedKey as Uint8Array;
+  } else {
+    cipherB64 = payloadOrCiphertext;
+    nonceB64 = nonceOrSharedKey as string;
+    key = sharedKeyParam!;
+  }
+
+  const ciphertext = decodeBase64(cipherB64);
+  const nonce = decodeBase64(nonceB64);
+  const plaintextBytes = nacl.box.open.after(ciphertext, nonce, key);
 
   if (!plaintextBytes) {
     throw new Error("Decryption failed: message may be corrupted or tampered with");
@@ -86,13 +95,7 @@ export function decryptChunk(data: Uint8Array, nonce: Uint8Array, sharedKey: Uin
   return result;
 }
 
-/* ---------------------------------------------------------------------
- * Local key storage (IndexedDB). Kept minimal here; in production wrap
- * `secretKey` with a passphrase-derived key (e.g. via WebCrypto PBKDF2)
- * before persisting, so a stolen device backup alone isn't enough.
- * ------------------------------------------------------------------- */
-
-const DB_NAME = "baatein-keys";
+const DB_NAME = "aethersync-keys";
 const STORE_NAME = "identity";
 
 function openDb(): Promise<IDBDatabase> {
@@ -124,7 +127,6 @@ export async function loadIdentityKeyPair(): Promise<KeyPairB64 | null> {
   });
 }
 
-/** Ensures a device always has an identity keypair, generating one on first use. */
 export async function getOrCreateIdentityKeyPair(): Promise<KeyPairB64> {
   const existing = await loadIdentityKeyPair();
   if (existing) return existing;
