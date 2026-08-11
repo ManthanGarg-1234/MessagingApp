@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "build": "npm --prefix ../frontend install && npm --prefix ../frontend run build",
+    "vercel-build": "npm --prefix ../frontend install && npm --prefix ../frontend run build",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
