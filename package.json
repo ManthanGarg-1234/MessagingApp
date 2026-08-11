@@ -10,6 +10,7 @@
   "scripts": {
     "start": "npx concurrently \"npm run dev --prefix backend\" \"npm run start --prefix frontend\"",
     "dev": "npx concurrently \"npm run dev --prefix backend\" \"npm run start --prefix frontend\"",
+    "build": "npm run build --prefix frontend",
     "backend": "npm run dev --prefix backend",
     "frontend": "npm run start --prefix frontend",
     "test": "npm test --prefix backend && npm run typecheck --prefix frontend"
