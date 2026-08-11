@@ -1,64 +1,47 @@
-# 🚀 Baatein Production Deployment Guide
+# 🚀 AetherSync Production Deployment Guide
 
-This guide details how to deploy **Baatein** (Backend Node.js API, WebSockets Server, MongoDB database, and React Frontend) to popular cloud infrastructure providers.
-
----
-
-## 1. Quick Local Docker Deployment (Recommended)
-
-Run the entire containerized stack locally with a single command:
-
-```bash
-docker-compose up --build -d
-```
-
-- **Frontend Application**: `http://localhost` (Served via NGINX)
-- **Backend API & WebSockets**: `http://localhost:4000`
-- **Healthcheck Endpoint**: `http://localhost:4000/api/health`
+This guide details how to deploy **AetherSync** (Backend Node.js API, WebSockets Server, MongoDB database, and React Frontend) to **Render.com** using 1-Click Blueprints, Vercel, or Railway.
 
 ---
 
-## 2. Deploying to Render (Free Tier)
+## ⚡ 1. Render.com 1-Click Blueprint Deployment (Recommended)
 
-### Step 1: Deploy Backend & WebSockets Service
-1. Create a new **Web Service** on [Render](https://render.com).
-2. Connect your Git repository and select the `backend/` root directory.
-3. Choose **Node** runtime.
-4. Set Build Command: `npm install`
-5. Set Start Command: `node src/server.js`
-6. Add Environment Variables:
-   - `NODE_ENV`: `production`
-   - `PORT`: `4000`
-   - `JWT_SECRET`: Generate a long random secret key
-   - `MONGO_URI`: MongoDB Atlas connection string (or leave empty for memory-server fallback)
+Render automatically detects the [`render.yaml`](file:///c:/Users/hp/Downloads/baatein/baatein/render.yaml) file in your repository and provisions both the Node.js API server and the Static SPA frontend in a single click!
 
-### Step 2: Deploy Frontend
-1. Create a new **Static Site** on Render (or Vercel / Netlify).
-2. Root directory: `frontend/`
-3. Build Command: `npm run build`
-4. Publish Directory: `dist`
+### Step-by-Step Instructions:
 
----
+1. **Log In to Render**:
+   - Go to [https://dashboard.render.com](https://dashboard.render.com) and log in with your GitHub account.
 
-## 3. Deploying to Vercel & Railway
+2. **Create New Blueprint Instance**:
+   - Click **New +** in the top navigation bar and select **Blueprint**.
 
-### Backend (Railway)
-1. Push project to GitHub.
-2. Link repo to **Railway.app** and deploy `backend/`.
-3. Railway automatically exposes WebSocket ports and handles zero-downtime restarts.
+3. **Connect Your GitHub Repository**:
+   - Select your repository: `ManthanGarg-1234/MessagingApp`.
+   - Render will parse `render.yaml` and display:
+     - `aethersync-backend` (Node.js Web Service with WebSockets)
+     - `aethersync-frontend` (Static Site with SPA routing)
 
-### Frontend (Vercel)
-1. Import repository into **Vercel**.
-2. Framework Preset: `Other` (or Webpack).
-3. Build Command: `npm run build`
-4. Output Directory: `dist`
+4. **Click "Apply"**:
+   - Click **Apply** to start building and deploying both services automatically!
+   - Your backend will be live at `https://aethersync-backend.onrender.com`.
+   - Your frontend will be live at `https://aethersync-frontend.onrender.com`.
 
 ---
 
-## 4. Production Security & Checklist
+## 2. Deploying Frontend to Vercel (Optional Alternative)
 
-- [x] **Rate Limiting**: Rate-limiting token bucket active on `/api/auth` (max 20 req/min) and `/api/` (max 120 req/min).
-- [x] **CORS Protection**: Configure `CLIENT_ORIGIN` in `.env.production` to match production frontend URL.
-- [x] **Database Fallback**: Gracefully handles MongoDB Atlas network drops with `mongodb-memory-server` fallback.
-- [x] **End-to-End Encryption**: Keypairs generated client-side; zero plaintext stored on server.
-- [x] **Health Check Monitoring**: Query `/api/health` for uptime, memory usage, and DB connection state.
+If you prefer serving the frontend from **Vercel**:
+
+1. Log in to [https://vercel.com](https://vercel.com) and click **Add New Project**.
+2. Select `ManthanGarg-1234/MessagingApp`.
+3. Vercel automatically detects [`vercel.json`](file:///c:/Users/hp/Downloads/baatein/baatein/vercel.json).
+4. Click **Deploy**!
+
+---
+
+## 3. Production Security & Health Monitoring
+
+- [x] **Rate Limiting**: Active on `/api/auth` (20 req/min) and `/api/` (120 req/min).
+- [x] **Zero-Knowledge E2EE**: Client-side Curve25519 key exchange; zero plaintext stored on server.
+- [x] **Health Check Endpoint**: Query `https://aethersync-backend.onrender.com/api/health` for uptime, memory metrics, and DB connection state.
